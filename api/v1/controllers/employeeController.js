@@ -39,7 +39,7 @@ const getEmployees = async (request, response) => {
         const rows = await dbConnection.execute(queries.getEmployees)
         response.status(200).json(rows[0])
     } catch (error) {
-        console.error('Error querying database: ', error)
+        console.error('Error querying database: ', error.message)
         response.status(500).json({ message: 'Error querying database' })
     }
 }
@@ -57,7 +57,7 @@ const getEmployee = async (request, response) => {
         }
         return response.status(200).json(rows[0][0])
     } catch (error) {
-        console.error('Error querying database: ', error)
+        console.error('Error querying database: ', error.message)
         return response.status(500).json({ message: 'Error querying database' })
     }
 }
@@ -126,7 +126,7 @@ const addEmployee = async (request, response) => {
             }
         })
     } catch (error) {
-        console.error('Error querying database: ', error)
+        console.error('Error querying database: ', error.message)
         return response.status(500).json({ message: 'Error querying database' })
     }
 }
@@ -201,7 +201,7 @@ const editEmployee = async (request, response) => {
             }
         })
     } catch (error) {
-        console.error('Error querying database: ', error)
+        console.error('Error querying database: ', error.message)
         return response.status(500).json({ message: 'Error querying database' })
     }
 }
@@ -221,7 +221,7 @@ const deleteEmployee = async (request, response) => {
 
         return response.status(200).json({ message: 'Employee deleted successfully' })
     } catch (error) {
-        console.error('Error querying database: ', error)
+        console.error('Error querying database: ', error.message)
         return response.status(500).json({ message: 'Error querying database' })
     }
 }

@@ -25,7 +25,7 @@ const getDepartments = async (request, response) => {
         const rows = await dbConnection.execute(queries.getDepartments)
         response.status(200).json(rows[0])
     } catch (error) {
-        console.error('Error querying database: ', error)
+        console.error('Error querying database: ', error.message)
         response.status(500).json({ message: 'Error querying database' })
     }
 }
@@ -42,7 +42,7 @@ const getDepartment = async (request, response) => {
 
         return response.status(200).json(rows[0][0])
     } catch (error) {
-        console.error('Error querying database: ', error)
+        console.error('Error querying database: ', error.message)
         return response.status(500).json({ message: 'Error querying database' })
     }
 }
@@ -76,7 +76,7 @@ const addDepartment = async (request, response) => {
             }
         })
     } catch (error) {
-        console.error('Error querying database: ', error)
+        console.error('Error querying database: ', error.message)
         return response.status(500).json({ message: 'Error querying database' })
     }
 }
@@ -115,7 +115,7 @@ const editDepartment = async (request, response) => {
             }
         })
     } catch (error) {
-        console.error('Error querying database: ', error)
+        console.error('Error querying database: ', error.message)
         return response.status(500).json({ message: 'Error querying database' })
     }
 }
@@ -133,7 +133,7 @@ const deleteDepartment = async (request, response) => {
 
         return response.status(200).json({ message: 'Department deleted successfully' })
     } catch (error) {
-        console.error('Error querying database: ', error)
+        console.error('Error querying database: ', error.message)
         return response.status(500).json({ message: 'Error querying database' })
     }
 }
