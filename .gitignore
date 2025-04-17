@@ -1,0 +1,62 @@
+# Node
+node_modules/
+package-lock.json
+yarn.lock
+.pnpm-debug.log
+
+# Build
+dist/
+build/
+tmp/
+temp/
+.cache/
+.vite/
+.pnp/
+.pnp.js
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Database
+*.dump.sql
+*.backup.sql
+dump.sql
+dump/
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.directory
+Icon?
+._*
+*~
+
+# Editor settings
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# TypeScript
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+*.d.ts
+
+# Lint/formatting
+.eslintcache
+.prettiercache
