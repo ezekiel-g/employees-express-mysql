@@ -1,4 +1,4 @@
-const pool = require('../database/database')
+const dbConnection = require('../database/database')
 
 const queries = {
     getDepartments: `SELECT id, name, code, location, is_active 
@@ -22,7 +22,7 @@ const validateLocation = input => {
 
 const getDepartments = async (request, response) => {
     try {
-        const rows = await pool.execute(queries.getDepartments)
+        const rows = await dbConnection.execute(queries.getDepartments)
         response.status(200).json(rows[0])
     } catch (error) {
         console.error('Error querying database: ', error)
@@ -35,7 +35,7 @@ const getDepartment = async (request, response) => {
     if (!id) { return response.status(400).json({ message: 'ID required' }) }
 
     try {
-        const rows = await pool.execute(queries.getDepartment, [id])
+        const rows = await dbConnection.execute(queries.getDepartment, [id])
         if (rows[0].length === 0) {
             return response.status(404).json({ message: 'Not found' })
         }
@@ -61,7 +61,7 @@ const addDepartment = async (request, response) => {
     const isActiveValue = is_active === undefined ? true : is_active
 
     try {
-        const result = await pool.execute(
+        const result = await dbConnection.execute(
             queries.addDepartment, [name, code, location, isActiveValue]
         )
 
@@ -96,7 +96,7 @@ const editDepartment = async (request, response) => {
     const isActiveValue = is_active === undefined ? true : is_active
 
     try {
-        const result = await pool.execute(
+        const result = await dbConnection.execute(
             queries.editDepartment, [name, code, location, isActiveValue, id]
         )
 
@@ -125,7 +125,7 @@ const deleteDepartment = async (request, response) => {
     if (!id) { return response.status(400).json({ message: 'ID required' }) }
 
     try {
-        const result = await pool.execute(queries.deleteDepartment, [id])
+        const result = await dbConnection.execute(queries.deleteDepartment, [id])
 
         if (result[0].affectedRows === 0) {
             return response.status(404).json({ message: 'Department not found' })

@@ -1,4 +1,4 @@
-const pool = require('../database/database')
+const dbConnection = require('../database/database')
 
 const queries = {
     getEmployees: `SELECT id, first_name, last_name, email, hire_date, 
@@ -36,7 +36,7 @@ const validateCountryCode = input => {
 
 const getEmployees = async (request, response) => {
     try {
-        const rows = await pool.execute(queries.getEmployees)
+        const rows = await dbConnection.execute(queries.getEmployees)
         response.status(200).json(rows[0])
     } catch (error) {
         console.error('Error querying database: ', error)
@@ -51,7 +51,7 @@ const getEmployee = async (request, response) => {
     }
 
     try {
-        const rows = await pool.execute(queries.getEmployee, [id])
+        const rows = await dbConnection.execute(queries.getEmployee, [id])
         if (rows[0].length === 0) {
             return response.status(404).json({ message: 'Not found' })
         }
@@ -98,7 +98,7 @@ const addEmployee = async (request, response) => {
     const isActiveValue = is_active === undefined ? true : is_active
 
     try {
-        const result = await pool.execute(
+        const result = await dbConnection.execute(
             queries.addEmployee, [
                 first_name,
                 last_name,
@@ -168,7 +168,7 @@ const editEmployee = async (request, response) => {
     const isActiveValue = is_active === undefined ? true : is_active
 
     try {
-        const result = await pool.execute(
+        const result = await dbConnection.execute(
             queries.editEmployee, [
                 first_name,
                 last_name,
@@ -213,7 +213,7 @@ const deleteEmployee = async (request, response) => {
     }
 
     try {
-        const result = await pool.execute(queries.deleteEmployee, [id])
+        const result = await dbConnection.execute(queries.deleteEmployee, [id])
 
         if (result[0].affectedRows === 0) {
             return response.status(404).json({ message: 'Employee not found' })
