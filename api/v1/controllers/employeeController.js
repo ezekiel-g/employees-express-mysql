@@ -19,19 +19,23 @@ const queries = {
                      WHERE id = ?`
 }
 
-const validateEmail = input => {
-    const regex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
-    return regex.test(input)
-}
+const handleError = (response, error) => {
+    let statusCode = 500
+    let message = 'Unexpected error occurred'
 
-const validatePhoneNumber = input => {
-    const regex = /^[0-9]{7,15}$/
-    return regex.test(input)
-}
+    if (error.code === 'ER_DUP_ENTRY') {
+        statusCode = 400
+        message = 'Duplicate entry: ' + error.message
+    } else if (error.code === 'ER_BAD_NULL_ERROR') {
+        statusCode = 400
+        message = 'Missing required field'
+    } else if (error.code === 'ER_NO_REFERENCED_ROW_2') {
+        statusCode = 400
+        message = 'Invalid department ID'
+    }
 
-const validateCountryCode = input => {
-    const regex = /^[0-9]{1,4}$/
-    return regex.test(input)
+    console.error('Error: ', error.message)
+    return response.status(statusCode).json({ message })
 }
 
 const getEmployees = async (request, response) => {
@@ -39,26 +43,21 @@ const getEmployees = async (request, response) => {
         const rows = await dbConnection.execute(queries.getEmployees)
         response.status(200).json(rows[0])
     } catch (error) {
-        console.error('Error querying database: ', error.message)
-        response.status(500).json({ message: 'Error querying database' })
+        return handleError(response, error)
     }
 }
 
 const getEmployee = async (request, response) => {
     const { id } = request.params
-    if (!id) {
-        return response.status(400).json({ message: 'ID required' })
-    }
 
     try {
         const rows = await dbConnection.execute(queries.getEmployee, [id])
         if (rows[0].length === 0) {
-            return response.status(404).json({ message: 'Not found' })
+            return response.status(404).json({ message: 'Employee not found' })
         }
         return response.status(200).json(rows[0][0])
     } catch (error) {
-        console.error('Error querying database: ', error.message)
-        return response.status(500).json({ message: 'Error querying database' })
+        return handleError(response, error)
     }
 }
 
@@ -74,29 +73,6 @@ const addEmployee = async (request, response) => {
         is_active
     } = request.body
 
-    if (
-        !first_name ||
-        !last_name ||
-        !email ||
-        !hire_date ||
-        !country_code ||
-        !phone_number
-    ) {
-        return response.status(400).json({ message: 'All fields required' })
-    }
-
-    if (!validateEmail(email)) {
-        return response.status(400).json({ message: 'Invalid email format' })
-    }
-    if (!validatePhoneNumber(phone_number)) {
-        return response.status(400).json({ message: 'Invalid phone number format' })
-    }
-    if (!validateCountryCode(country_code)) {
-        return response.status(400).json({ message: 'Invalid country code format' })
-    }
-
-    const isActiveValue = is_active === undefined ? true : is_active
-
     try {
         const result = await dbConnection.execute(
             queries.addEmployee, [
@@ -107,7 +83,7 @@ const addEmployee = async (request, response) => {
                 department_id,
                 country_code,
                 phone_number,
-                isActiveValue
+                is_active
             ]
         )
 
@@ -122,12 +98,11 @@ const addEmployee = async (request, response) => {
                 department_id,
                 country_code,
                 phone_number,
-                is_active: isActiveValue
+                is_active
             }
         })
     } catch (error) {
-        console.error('Error querying database: ', error.message)
-        return response.status(500).json({ message: 'Error querying database' })
+        return handleError(response, error)
     }
 }
 
@@ -144,29 +119,6 @@ const editEmployee = async (request, response) => {
         is_active
     } = request.body
 
-    if (
-        !first_name ||
-        !last_name ||
-        !email ||
-        !hire_date ||
-        !country_code ||
-        !phone_number
-    ) {
-        return response.status(400).json({ message: 'All fields required' })
-    }
-
-    if (!validateEmail(email)) {
-        return response.status(400).json({ message: 'Invalid email format' })
-    }
-    if (!validatePhoneNumber(phone_number)) {
-        return response.status(400).json({ message: 'Invalid phone number format' })
-    }
-    if (!validateCountryCode(country_code)) {
-        return response.status(400).json({ message: 'Invalid country code format' })
-    }
-
-    const isActiveValue = is_active === undefined ? true : is_active
-
     try {
         const result = await dbConnection.execute(
             queries.editEmployee, [
@@ -177,7 +129,7 @@ const editEmployee = async (request, response) => {
                 department_id,
                 country_code,
                 phone_number,
-                isActiveValue,
+                is_active,
                 id
             ]
         )
@@ -197,20 +149,16 @@ const editEmployee = async (request, response) => {
                 department_id,
                 country_code,
                 phone_number,
-                is_active: isActiveValue
+                is_active
             }
         })
     } catch (error) {
-        console.error('Error querying database: ', error.message)
-        return response.status(500).json({ message: 'Error querying database' })
+        return handleError(response, error)
     }
 }
 
 const deleteEmployee = async (request, response) => {
     const { id } = request.params
-    if (!id) {
-        return response.status(400).json({ message: 'ID required' })
-    }
 
     try {
         const result = await dbConnection.execute(queries.deleteEmployee, [id])
@@ -221,8 +169,7 @@ const deleteEmployee = async (request, response) => {
 
         return response.status(200).json({ message: 'Employee deleted successfully' })
     } catch (error) {
-        console.error('Error querying database: ', error.message)
-        return response.status(500).json({ message: 'Error querying database' })
+        return handleError(response, error)
     }
 }
 
