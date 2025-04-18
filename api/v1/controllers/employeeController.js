@@ -1,4 +1,4 @@
-const dbConnection = require('../database/database')
+import dbConnection from '../database/database.js'
 
 const queries = {
     getEmployees: `SELECT id, first_name, last_name, email, hire_date, 
@@ -173,7 +173,7 @@ const deleteEmployee = async (request, response) => {
     }
 }
 
-module.exports = {
+export default {
     getEmployees,
     getEmployee,
     addEmployee,
