@@ -15,9 +15,26 @@ const queries = {
                       WHERE id = ?`
 }
 
-const validateLocation = input => {
-    const validLocations = new Set(['New York', 'San Francisco', 'London'])
-    return validLocations.has(input)
+const handleError = (response, error) => {
+    let statusCode = 500
+    let message = 'Unexpected error'
+
+    if (error.code === 'ER_DUP_ENTRY') {
+        statusCode = 400
+        message = 'Duplicate entry'
+    } else if (error.code === 'ER_BAD_NULL_ERROR') {
+        statusCode = 400
+        message = 'Missing required field'
+    } else if (error.code === 'ER_NO_REFERENCED_ROW_2') {
+        statusCode = 400
+        message = 'Invalid reference to another table'
+    } else if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+        statusCode = 409
+        message = 'Cannot delete department with related records'
+    }
+
+    console.error('Error: ', error.message)
+    return response.status(statusCode).json({ message })
 }
 
 const getDepartments = async (request, response) => {
@@ -25,44 +42,31 @@ const getDepartments = async (request, response) => {
         const rows = await dbConnection.execute(queries.getDepartments)
         response.status(200).json(rows[0])
     } catch (error) {
-        console.error('Error querying database: ', error.message)
-        response.status(500).json({ message: 'Error querying database' })
+        return handleError(response, error)
     }
 }
 
 const getDepartment = async (request, response) => {
     const { id } = request.params
-    if (!id) { return response.status(400).json({ message: 'ID required' }) }
 
     try {
         const rows = await dbConnection.execute(queries.getDepartment, [id])
         if (rows[0].length === 0) {
-            return response.status(404).json({ message: 'Not found' })
+            return response.status(404).json({ message: 'Department not found' })
         }
 
         return response.status(200).json(rows[0][0])
     } catch (error) {
-        console.error('Error querying database: ', error.message)
-        return response.status(500).json({ message: 'Error querying database' })
+        return handleError(response, error)
     }
 }
 
 const addDepartment = async (request, response) => {
     const { name, code, location, is_active } = request.body
 
-    if (!name || !code || !location) {
-        return response.status(400).json({ message: 'All fields required' })
-    }
-
-    if (!validateLocation(location)) {
-        return response.status(400).json({ message: 'Invalid location' })
-    }
-
-    const isActiveValue = is_active === undefined ? true : is_active
-
     try {
         const result = await dbConnection.execute(
-            queries.addDepartment, [name, code, location, isActiveValue]
+            queries.addDepartment, [name, code, location, is_active]
         )
 
         return response.status(201).json({
@@ -72,12 +76,11 @@ const addDepartment = async (request, response) => {
                 name,
                 code,
                 location,
-                is_active: isActiveValue
+                is_active
             }
         })
     } catch (error) {
-        console.error('Error querying database: ', error.message)
-        return response.status(500).json({ message: 'Error querying database' })
+        return handleError(response, error)
     }
 }
 
@@ -85,19 +88,9 @@ const editDepartment = async (request, response) => {
     const { id } = request.params
     const { name, code, location, is_active } = request.body
 
-    if (!name || !code || !location) {
-        return response.status(400).json({ message: 'All fields required' })
-    }
-
-    if (!validateLocation(location)) {
-        return response.status(400).json({ message: 'Invalid location' })
-    }
-
-    const isActiveValue = is_active === undefined ? true : is_active
-
     try {
         const result = await dbConnection.execute(
-            queries.editDepartment, [name, code, location, isActiveValue, id]
+            queries.editDepartment, [name, code, location, is_active, id]
         )
 
         if (result[0].affectedRows === 0) {
@@ -111,18 +104,16 @@ const editDepartment = async (request, response) => {
                 name,
                 code,
                 location,
-                is_active: isActiveValue
+                is_active
             }
         })
     } catch (error) {
-        console.error('Error querying database: ', error.message)
-        return response.status(500).json({ message: 'Error querying database' })
+        return handleError(response, error)
     }
 }
 
 const deleteDepartment = async (request, response) => {
     const { id } = request.params
-    if (!id) { return response.status(400).json({ message: 'ID required' }) }
 
     try {
         const result = await dbConnection.execute(queries.deleteDepartment, [id])
@@ -133,8 +124,7 @@ const deleteDepartment = async (request, response) => {
 
         return response.status(200).json({ message: 'Department deleted successfully' })
     } catch (error) {
-        console.error('Error querying database: ', error.message)
-        return response.status(500).json({ message: 'Error querying database' })
+        return handleError(response, error)
     }
 }
 
