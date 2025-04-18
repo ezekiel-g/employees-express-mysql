@@ -1,4 +1,4 @@
-const dbConnection = require('../database/database')
+import dbConnection from '../database/database.js'
 
 const queries = {
     getDepartments: `SELECT id, name, code, location, is_active 
@@ -128,7 +128,7 @@ const deleteDepartment = async (request, response) => {
     }
 }
 
-module.exports = {
+export default {
     getDepartments,
     getDepartment,
     addDepartment,
