@@ -2,13 +2,14 @@ Employees Express MySQL is a Node Express API that demonstrates interaction with
 a MySQL database, showcasing a one-to-many relationship between entities.
 
 To use this app for other MySQL database tables, change the routes in
-`server.js`, the `.sql` files in `/api/v1/db` the app's name in `package.json`.
+`server.js`, the `.sql` files in `/api/v1/db` and the app's name in
+`package.json`.
 
 In `server.js`...
 
 ```
-app.use('/api/v1/departments', createCrudRouter('departments'))
-app.use('/api/v1/employees', createCrudRouter('employees'))
+app.use('/api/v1/departments', createCrudRouter(pool, 'departments'));
+app.use('/api/v1/employees', createCrudRouter(pool, 'employees'));
 ```
 
 Becomes...
