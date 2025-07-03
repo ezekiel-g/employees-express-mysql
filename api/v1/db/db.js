@@ -18,7 +18,7 @@ const createPool = async () => {
     const [sqlResult] = await pool.execute('SELECT 1;');
 
     if (Array.isArray(sqlResult) && sqlResult.length > 0) {
-      console.log('Connected to the database');
+      console.log('Connected to database');
     }
   } catch (error) {
     pool = null;
